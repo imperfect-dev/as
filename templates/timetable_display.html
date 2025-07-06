@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Timetable - {{ section_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">TIME TABLE</h2>
+                    <p class="text-muted mb-0">{{ section_name }} - {{ academic_year }}</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary me-2" onclick="printTimetable()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                    <div class="dropdown d-inline">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('export.export_excel') }}">
+                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('export.export_csv') }}">
+                                <i class="bi bi-file-earmark-csv"></i> CSV
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timetable Grid -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0 timetable-grid">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center" style="width: 120px;">Day of week</th>
+                                    {% for period in periods %}
+                                    <th class="text-center period-header" style="min-width: 150px;">
+                                        <div class="fw-bold">{{ period.period_name or ('Period ' + loop.index|string) }}</div>
+                                        <div class="small">{{ period.start_time.strftime('%I:%M %p') }}</div>
+                                        <div class="small">{{ period.end_time.strftime('%I:%M %p') }}</div>
+                                    </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] %}
+                                {% for day in days %}
+                                <tr>
+                                    <td class="fw-bold text-center day-header">{{ day[:3] }}</td>
+                                    {% for period in periods %}
+                                    <td class="text-center period-cell">
+                                        {% set entry = timetable_grid.get(day, {}).get(period.id) %}
+                                        {% if entry %}
+                                            <div class="subject-cell {{ entry.course.code[:2]|lower }}-subject">
+                                                <div class="fw-bold subject-code">{{ entry.course.code }}</div>
+                                                <div class="small subject-name">{{ entry.course.name[:15] }}{% if entry.course.name|length > 15 %}...{% endif %}</div>
+                                                <div class="tiny text-muted">{{ entry.room.code }}</div>
+                                                <div class="tiny text-muted">{{ entry.teacher.name.split()[0] if entry.teacher.name.split() else entry.teacher.name }}</div>
+                                            </div>
+                                        {% else %}
+                                            <div class="empty-cell">-</div>
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Allocation Summary -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ul"></i> Allocation of Subjects
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for subject in subject_summary %}
+                        <div class="col-md-4 col-lg-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="subject-color-indicator {{ subject.code[:2]|lower }}-subject me-2"></div>
+                                <div>
+                                    <strong>{{ subject.code }}</strong> - {{ subject.name }}
+                                    <br><small class="text-muted">{{ subject.credits }} credits</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Summary -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="text-primary">{{ analytics.total_periods }}</h5>
+                            <p class="card-text">Total Periods</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="text-success">{{ analytics.scheduled_periods }}</h5>
+                            <p class="card-text">Scheduled Periods</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="text-info">{{ analytics.utilization_percent }}%</h5>
+                            <p class="card-text">Utilization Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timetable-grid {
+    font-size: 0.9rem;
+}
+
+.period-header {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    color: white;
+    padding: 12px 8px;
+}
+
+.day-header {
+    background: #f8f9fa;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.period-cell {
+    padding: 8px 4px;
+    height: 80px;
+    vertical-align: middle;
+    position: relative;
+}
+
+.subject-cell {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.subject-cell:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.subject-code {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.subject-name {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.tiny {
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.empty-cell {
+    color: #6c757d;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.subject-color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+/* Subject color coding */
+.ma-subject { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); color: #1976d2; }
+.ph-subject { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); color: #7b1fa2; }
+.ch-subject { background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); color: #388e3c; }
+.bi-subject { background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%); color: #f57c00; }
+.en-subject { background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%); color: #c2185b; }
+.hi-subject { background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%); color: #689f38; }
+.cs-subject { background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); color: #00796b; }
+.pe-subject { background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); color: #ffa000; }
+.os-subject { background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%); color: #3f51b5; }
+.ml-subject { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); color: #d32f2f; }
+.pa-subject { background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%); color: #0097a7; }
+.cn-subject { background: linear-gradient(135deg, #f9fbe7 0%, #f0f4c3 100%); color: #827717; }
+
+.ma-subject .subject-color-indicator { background: #1976d2; }
+.ph-subject .subject-color-indicator { background: #7b1fa2; }
+.ch-subject .subject-color-indicator { background: #388e3c; }
+.bi-subject .subject-color-indicator { background: #f57c00; }
+.en-subject .subject-color-indicator { background: #c2185b; }
+.hi-subject .subject-color-indicator { background: #689f38; }
+.cs-subject .subject-color-indicator { background: #00796b; }
+.pe-subject .subject-color-indicator { background: #ffa000; }
+.os-subject .subject-color-indicator { background: #3f51b5; }
+.ml-subject .subject-color-indicator { background: #d32f2f; }
+.pa-subject .subject-color-indicator { background: #0097a7; }
+.cn-subject .subject-color-indicator { background: #827717; }
+
+@media print {
+    .btn, .dropdown, .card-header {
+        display: none !important;
+    }
+    
+    .timetable-grid {
+        font-size: 0.8rem;
+    }
+    
+    .period-cell {
+        height: 60px;
+    }
+    
+    .subject-cell {
+        height: 50px;
+    }
+}
+
+@media (max-width: 768px) {
+    .timetable-grid {
+        font-size: 0.7rem;
+    }
+    
+    .period-cell {
+        height: 60px;
+        padding: 4px 2px;
+    }
+    
+    .subject-cell {
+        height: 50px;
+        padding: 2px;
+    }
+    
+    .subject-code {
+        font-size: 0.8rem;
+    }
+    
+    .subject-name {
+        font-size: 0.65rem;
+    }
+    
+    .tiny {
+        font-size: 0.6rem;
+    }
+}
+</style>
+
+<script>
+function printTimetable() {
+    window.print();
+}
+
+// Tooltip initialization for mobile
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for mobile responsiveness
+    const subjectCells = document.querySelectorAll('.subject-cell');
+    subjectCells.forEach(cell => {
+        cell.addEventListener('click', function() {
+            // Could add modal with detailed information
+            console.log('Subject cell clicked:', this);
+        });
+    });
+});
+</script>
+{% endblock %}

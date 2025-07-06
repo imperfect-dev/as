@@ -1,0 +1,549 @@
+{% extends "base.html" %}
+
+{% block title %}Timetable Setup Wizard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Timetable Setup Wizard</h1>
+                <span class="badge bg-primary">Step <span id="current-step">1</span> of 7</span>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress mb-4" style="height: 4px;">
+                <div class="progress-bar" role="progressbar" style="width: 14%;" id="progress-bar"></div>
+            </div>
+            
+            <!-- Step 1: Institution Information -->
+            <div class="card step-card" id="step-1">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-building"></i> Institution Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="institution-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Institution Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="institution_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Institution Code <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="institution_code" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" name="address" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Institution Type</label>
+                                    <select class="form-select" name="institution_type">
+                                        <option value="school">School</option>
+                                        <option value="college">College</option>
+                                        <option value="university">University</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Academic Year</label>
+                                    <input type="text" class="form-control" name="academic_year" value="2025-2026">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Step 2: Departments -->
+            <div class="card step-card d-none" id="step-2">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-diagram-2"></i> Departments/Branches
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="addDepartment()">
+                            <i class="bi bi-plus-circle"></i> Add Department
+                        </button>
+                    </div>
+                    <div id="departments-container">
+                        <!-- Department entries will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Time Slots -->
+            <div class="card step-card d-none" id="step-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock"></i> Time Slots & Schedule
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Working Days</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="monday" name="working_days" checked>
+                                <label class="form-check-label" for="monday">Monday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="2" id="tuesday" name="working_days" checked>
+                                <label class="form-check-label" for="tuesday">Tuesday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="3" id="wednesday" name="working_days" checked>
+                                <label class="form-check-label" for="wednesday">Wednesday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="4" id="thursday" name="working_days" checked>
+                                <label class="form-check-label" for="thursday">Thursday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="5" id="friday" name="working_days" checked>
+                                <label class="form-check-label" for="friday">Friday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="6" id="saturday" name="working_days">
+                                <label class="form-check-label" for="saturday">Saturday</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Daily Schedule</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Start Time</label>
+                                    <input type="time" class="form-control" name="start_time" value="08:00">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">End Time</label>
+                                    <input type="time" class="form-control" name="end_time" value="17:00">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <label class="form-label">Period Duration (minutes)</label>
+                                    <input type="number" class="form-control" name="period_duration" value="50">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Break Duration (minutes)</label>
+                                    <input type="number" class="form-control" name="break_duration" value="10">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" onclick="generateTimeSlots()">
+                            <i class="bi bi-gear"></i> Generate Time Slots
+                        </button>
+                    </div>
+                    <div id="timeslots-preview" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Step 4: Classrooms -->
+            <div class="card step-card d-none" id="step-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-door-open"></i> Classrooms & Facilities
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="addRoom()">
+                            <i class="bi bi-plus-circle"></i> Add Classroom
+                        </button>
+                    </div>
+                    <div id="rooms-container">
+                        <!-- Room entries will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Faculty -->
+            <div class="card step-card d-none" id="step-5">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-people"></i> Faculty Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="addTeacher()">
+                            <i class="bi bi-plus-circle"></i> Add Faculty Member
+                        </button>
+                    </div>
+                    <div id="teachers-container">
+                        <!-- Teacher entries will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Courses & Subjects -->
+            <div class="card step-card d-none" id="step-6">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-book"></i> Courses & Subjects
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="addCourse()">
+                            <i class="bi bi-plus-circle"></i> Add Course
+                        </button>
+                    </div>
+                    <div id="courses-container">
+                        <!-- Course entries will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Constraints & Rules -->
+            <div class="card step-card d-none" id="step-7">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-shield-check"></i> Constraints & Rules
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Maximum Hours per Day (Faculty)</label>
+                                <input type="number" class="form-control" name="max_hours_per_day" value="8">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Maximum Hours per Week (Faculty)</label>
+                                <input type="number" class="form-control" name="max_hours_per_week" value="40">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Lunch Break Duration (minutes)</label>
+                                <input type="number" class="form-control" name="lunch_break" value="60">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Maximum Consecutive Classes</label>
+                                <input type="number" class="form-control" name="max_consecutive" value="3">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Minimum Gap Between Classes (minutes)</label>
+                                <input type="number" class="form-control" name="min_gap" value="10">
+                            </div>
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" name="allow_back_to_back" checked>
+                                <label class="form-check-label">Allow back-to-back classes</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="prev-btn" onclick="previousStep()" disabled>
+                            <i class="bi bi-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" id="next-btn" onclick="nextStep()">
+                            Next <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button type="button" class="btn btn-success d-none" id="finish-btn" onclick="submitSetup()">
+                            <i class="bi bi-check2-circle"></i> Complete Setup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 7;
+
+function nextStep() {
+    if (validateCurrentStep()) {
+        currentStep++;
+        updateStepDisplay();
+    }
+}
+
+function previousStep() {
+    currentStep--;
+    updateStepDisplay();
+}
+
+function updateStepDisplay() {
+    // Hide all steps
+    document.querySelectorAll('.step-card').forEach(card => {
+        card.classList.add('d-none');
+    });
+    
+    // Show current step
+    document.getElementById(`step-${currentStep}`).classList.remove('d-none');
+    
+    // Update progress bar
+    const progressPercent = (currentStep / totalSteps) * 100;
+    document.getElementById('progress-bar').style.width = progressPercent + '%';
+    document.getElementById('current-step').textContent = currentStep;
+    
+    // Update button states
+    document.getElementById('prev-btn').disabled = currentStep === 1;
+    
+    if (currentStep === totalSteps) {
+        document.getElementById('next-btn').classList.add('d-none');
+        document.getElementById('finish-btn').classList.remove('d-none');
+    } else {
+        document.getElementById('next-btn').classList.remove('d-none');
+        document.getElementById('finish-btn').classList.add('d-none');
+    }
+}
+
+function validateCurrentStep() {
+    const currentForm = document.querySelector(`#step-${currentStep} form`);
+    if (currentForm) {
+        return currentForm.checkValidity();
+    }
+    return true;
+}
+
+function addDepartment() {
+    const container = document.getElementById('departments-container');
+    const index = container.children.length;
+    
+    const departmentHtml = `
+        <div class="row department-row mb-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Department Name" name="dept_name_${index}" required>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Code" name="dept_code_${index}" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" placeholder="Sections" name="dept_sections_${index}" value="1" min="1">
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" placeholder="Students/Section" name="dept_students_${index}" value="30">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger" onclick="removeDepartment(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', departmentHtml);
+}
+
+function removeDepartment(button) {
+    button.closest('.department-row').remove();
+}
+
+function addRoom() {
+    const container = document.getElementById('rooms-container');
+    const index = container.children.length;
+    
+    const roomHtml = `
+        <div class="row room-row mb-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Room Name" name="room_name_${index}" required>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="Code" name="room_code_${index}" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" placeholder="Capacity" name="room_capacity_${index}" value="30" min="1">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="room_type_${index}">
+                    <option value="lecture">Lecture Hall</option>
+                    <option value="lab">Laboratory</option>
+                    <option value="seminar">Seminar Room</option>
+                    <option value="auditorium">Auditorium</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="Building" name="room_building_${index}">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger" onclick="removeRoom(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', roomHtml);
+}
+
+function removeRoom(button) {
+    button.closest('.room-row').remove();
+}
+
+function addTeacher() {
+    const container = document.getElementById('teachers-container');
+    const index = container.children.length;
+    
+    const teacherHtml = `
+        <div class="row teacher-row mb-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Teacher Name" name="teacher_name_${index}" required>
+            </div>
+            <div class="col-md-3">
+                <input type="email" class="form-control" placeholder="Email" name="teacher_email_${index}" required>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="Employee ID" name="teacher_id_${index}" required>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="teacher_dept_${index}">
+                    <option value="">Select Department</option>
+                    <!-- This will be populated based on departments -->
+                </select>
+            </div>
+            <div class="col-md-1">
+                <input type="number" class="form-control" placeholder="Max Hours" name="teacher_hours_${index}" value="40" min="1">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger" onclick="removeTeacher(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', teacherHtml);
+}
+
+function removeTeacher(button) {
+    button.closest('.teacher-row').remove();
+}
+
+function addCourse() {
+    const container = document.getElementById('courses-container');
+    const index = container.children.length;
+    
+    const courseHtml = `
+        <div class="row course-row mb-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Course Name" name="course_name_${index}" required>
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="Course Code" name="course_code_${index}" required>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="course_dept_${index}">
+                    <option value="">Select Department</option>
+                    <!-- This will be populated based on departments -->
+                </select>
+            </div>
+            <div class="col-md-1">
+                <input type="number" class="form-control" placeholder="Credits" name="course_credits_${index}" value="3" min="1">
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" placeholder="Hours/Week" name="course_hours_${index}" value="3" min="1">
+            </div>
+            <div class="col-md-1">
+                <select class="form-select" name="course_semester_${index}">
+                    <option value="1">Sem 1</option>
+                    <option value="2">Sem 2</option>
+                    <option value="3">Sem 3</option>
+                    <option value="4">Sem 4</option>
+                    <option value="5">Sem 5</option>
+                    <option value="6">Sem 6</option>
+                    <option value="7">Sem 7</option>
+                    <option value="8">Sem 8</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger" onclick="removeCourse(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', courseHtml);
+}
+
+function removeCourse(button) {
+    button.closest('.course-row').remove();
+}
+
+function generateTimeSlots() {
+    const startTime = document.querySelector('[name="start_time"]').value;
+    const endTime = document.querySelector('[name="end_time"]').value;
+    const periodDuration = parseInt(document.querySelector('[name="period_duration"]').value);
+    const breakDuration = parseInt(document.querySelector('[name="break_duration"]').value);
+    const workingDays = Array.from(document.querySelectorAll('[name="working_days"]:checked')).map(cb => cb.value);
+    
+    // Generate time slots preview
+    const preview = document.getElementById('timeslots-preview');
+    preview.innerHTML = '<h6>Generated Time Slots Preview:</h6>';
+    
+    const dayNames = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    
+    workingDays.forEach(day => {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'mb-2';
+        dayDiv.innerHTML = `<strong>${dayNames[day]}:</strong> <span class="text-muted">Generated time slots will appear here</span>`;
+        preview.appendChild(dayDiv);
+    });
+}
+
+async function submitSetup() {
+    const formData = new FormData();
+    
+    // Collect all form data from all steps
+    document.querySelectorAll('.step-card input, .step-card select, .step-card textarea').forEach(element => {
+        if (element.type === 'checkbox') {
+            if (element.checked) {
+                formData.append(element.name, element.value);
+            }
+        } else {
+            formData.append(element.name, element.value);
+        }
+    });
+    
+    try {
+        const response = await fetch('/admin/setup-wizard', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            alert('Setup completed successfully!');
+            window.location.href = '/dashboard';
+        } else {
+            alert('Error during setup. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error during setup. Please try again.');
+    }
+}
+
+// Initialize the wizard
+document.addEventListener('DOMContentLoaded', function() {
+    addDepartment(); // Add one department by default
+    addRoom(); // Add one room by default
+    addTeacher(); // Add one teacher by default
+    addCourse(); // Add one course by default
+});
+</script>
+{% endblock %}
